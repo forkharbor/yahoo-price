@@ -571,7 +571,7 @@
     if (e.key === 'Enter') search();
   });
 
-  document.getElementById('records-list').innerHTML = '<div class="records-empty">読み込み中...</div>';
+  document.getElementById('records-list').innerHTML = '';
   docRef.onSnapshot(snap => {
     records = snap.exists ? (snap.data().list || []) : [];
     renderHistory();
