@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yahoo Shopping! 価格調査表</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Sans', 'Meiryo', 'Segoe UI', sans-serif;
+      background: #0a0e1a;
+      color: #d1d9e6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px 64px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      color: #e0e6f0;
+      font-weight: bold;
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+
+    .subtitle {
+      font-size: 0.78rem;
+      color: #4a5568;
+      margin-bottom: 36px;
+    }
+
+    /* ── 検索フォーム ── */
+    .card {
+      background: #111827;
+      border: 1px solid #1e2a3a;
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.72rem;
+      color: #8899aa;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+
+    .field input {
+      width: 100%;
+      background: #0d1420;
+      border: 1px solid #2a3a50;
+      border-radius: 8px;
+      color: #e0e6f0;
+      font-size: 1rem;
+      padding: 12px 14px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .field input:focus { border-color: #2563eb; }
+    .field input::placeholder { color: #3a4a60; }
+
+    .price-wrap { position: relative; }
+    .price-wrap input { text-align: right; padding-right: 32px; }
+    .price-unit {
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.85rem;
+      color: #4a5568;
+      pointer-events: none;
+    }
+
+    /* カテゴリボタン */
+    .cat-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+    .cat-btn {
+      padding: 7px 14px;
+      background: #1a2535;
+      border: 1px solid #2a3a50;
+      border-radius: 20px;
+      color: #8899aa;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .cat-btn.active {
+      font-weight: bold;
+    }
+    .cat-btn[data-cat="ポケモンカード"].active { background: #2a1a00; border-color: #7a4a00; color: #f0b030; }
+    .cat-btn[data-cat="遊戯王"].active         { background: #1a0a2e; border-color: #5b2a8e; color: #a855f7; }
+    .cat-btn[data-cat="ゲーム機"].active        { background: #0a2020; border-color: #0e6060; color: #2dd4bf; }
+    .cat-btn[data-cat="その他"].active          { background: #1a2535; border-color: #4a90d9; color: #4a90d9; }
+
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-title {
+      font-size: 0.78rem;
+      color: #4a90d9;
+      font-weight: bold;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .btn-cancel-edit {
+      font-size: 0.72rem;
+      color: #8899aa;
+      background: #1a2535;
+      border: 1px solid #2a3a50;
+      border-radius: 6px;
+      padding: 5px 12px;
+      cursor: pointer;
+    }
+
+    .btn-search {
+      width: 100%;
+      padding: 15px;
+      background: #1d4ed8;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: background 0.2s;
+      margin-top: 4px;
+    }
+    .btn-search:hover { background: #1e40af; }
+    .btn-search:active { background: #1e3a9f; }
+    .btn-search.editing { background: #065f46; }
+    .btn-search.editing:hover { background: #064e3b; }
+
+    .btn-records-edit {
+      font-size: 0.7rem;
+      color: #4a90d9;
+      background: none;
+      border: 1px solid #2a3a50;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-records-edit:hover { background: #1a2a40; }
+    .select-mode .btn-records-edit { display: none; }
+
+    /* ── 履歴 ── */
+    .records-section {
+      width: 100%;
+      max-width: 480px;
+      margin-top: 28px;
+    }
+
+    .records-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .records-header h2 {
+      font-size: 0.78rem;
+      color: #4a90d9;
+      font-weight: bold;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex: 1;
+    }
+
+    .btn-select-records, .btn-delete-selected {
+      font-size: 0.72rem;
+      color: #8899aa;
+      background: none;
+      border: 1px solid #2a3a50;
+      border-radius: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-select-records.active { color: #fbbf24; border-color: #92400e; background: #1c1408; }
+    .btn-delete-selected:hover { color: #e53e3e; border-color: #e53e3e; }
+
+    /* フィルタータブ */
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .filter-tab {
+      padding: 5px 12px;
+      background: #1a2535;
+      border: 1px solid #2a3a50;
+      border-radius: 16px;
+      color: #8899aa;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .filter-tab.active { background: #1d4ed8; border-color: #2563eb; color: #fff; font-weight: bold; }
+
+    .records-empty {
+      text-align: center;
+      color: #3a4a60;
+      font-size: 0.88rem;
+      padding: 24px 0;
+    }
+
+    .records-item {
+      background: #111827;
+      border: 1px solid #1e2a3a;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .records-item:hover { border-color: #2563eb; background: #0f1e3a; }
+    .records-item.selected { border-color: #2563eb; background: #0f1e3a; }
+
+    .records-check { display: none; flex-shrink: 0; }
+    .select-mode .records-check { display: block; }
+    .records-check input[type="checkbox"] {
+      width: 18px; height: 18px;
+      accent-color: #2563eb;
+      cursor: pointer;
+    }
+    .select-mode .records-arrow { display: none; }
+
+    .records-item-body { flex: 1; min-width: 0; }
+
+    .records-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .records-keyword {
+      font-size: 0.95rem;
+      color: #dde6f0;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* カテゴリバッジ */
+    .cat-badge {
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .cat-badge.ポケモンカード { background: #2a1a00; border: 1px solid #7a4a00; color: #f0b030; }
+    .cat-badge.遊戯王         { background: #1a0a2e; border: 1px solid #5b2a8e; color: #a855f7; }
+    .cat-badge.ゲーム機        { background: #0a2020; border: 1px solid #0e6060; color: #2dd4bf; }
+    .cat-badge.その他          { background: #1a2535; border: 1px solid #2a3a50; color: #6a7a8a; }
+
+    .records-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 0.72rem;
+      color: #4a5568;
+    }
+    .records-price { color: #4a90d9; font-weight: bold; }
+
+    .records-arrow { font-size: 0.85rem; color: #2a3a50; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Yahoo Shopping! 価格調査表</h1>
+  <p class="subtitle">価格＋送料が安い順で検索します</p>
+
+  <div class="card">
+    <div class="form-header">
+      <span class="form-title" id="form-title">新規検索</span>
+      <button class="btn-cancel-edit" id="btn-cancel-edit" onclick="cancelEdit()" style="display:none">キャンセル</button>
+    </div>
+    <div class="field">
+      <label>カテゴリ</label>
+      <div class="cat-btns" id="cat-btns">
+        <button class="cat-btn" data-cat="ポケモンカード" onclick="selectCategory(this)">ポケモンカード</button>
+        <button class="cat-btn" data-cat="遊戯王"         onclick="selectCategory(this)">遊戯王</button>
+        <button class="cat-btn" data-cat="ゲーム機"        onclick="selectCategory(this)">ゲーム機</button>
+        <button class="cat-btn active" data-cat="その他"  onclick="selectCategory(this)">その他</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>商品名</label>
+      <input type="text" id="inp-keyword" placeholder="例：ポケモンカード151 box" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>下限金額（円以上）</label>
+      <div class="price-wrap">
+        <input type="text" id="inp-price" placeholder="0" inputmode="numeric" oninput="formatPriceInput(this)">
+        <span class="price-unit">円</span>
+      </div>
+    </div>
+
+    <button class="btn-search" id="btn-search" onclick="search()">検索する</button>
+  </div>
+
+  <div class="records-section">
+    <div class="records-header">
+      <h2>検索履歴</h2>
+      <button class="btn-select-records" id="btn-select" onclick="toggleSelectMode()">選択</button>
+      <button class="btn-delete-selected" id="btn-delete-selected" onclick="deleteSelected()" style="display:none">削除</button>
+    </div>
+    <div class="filter-tabs" id="filter-tabs">
+      <button class="filter-tab active" data-filter="全て"          onclick="setFilter(this)">全て</button>
+      <button class="filter-tab"        data-filter="ポケモンカード" onclick="setFilter(this)">ポケモンカード</button>
+      <button class="filter-tab"        data-filter="遊戯王"         onclick="setFilter(this)">遊戯王</button>
+      <button class="filter-tab"        data-filter="ゲーム機"        onclick="setFilter(this)">ゲーム機</button>
+      <button class="filter-tab"        data-filter="その他"          onclick="setFilter(this)">その他</button>
+    </div>
+    <div id="records-list"></div>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  // ── Firebase 初期化 ──
+  firebase.initializeApp({
+    apiKey: "AIzaSyCfvqQWLB8NJqmaH0k2G0wPcbJJjz2Vu4A",
+    authDomain: "kaimemo-58bad.firebaseapp.com",
+    projectId: "kaimemo-58bad",
+    storageBucket: "kaimemo-58bad.firebasestorage.app",
+    messagingSenderId: "308069117698",
+    appId: "1:308069117698:web:c61a57853abb7e8ffb1c1b"
+  });
+  const db = firebase.firestore();
+  const docRef = db.collection('data').doc('yahoo-price');
+
+  const MAX_HISTORY = 100;
+  let records = [];
+  let selectMode = false;
+  let selectedIdxs = new Set();
+  let selectedCategory = 'その他';
+  let activeFilter = '全て';
+  let editingIdx = null;
+
+  // ── カテゴリ選択 ──
+  function selectCategory(btn) {
+    selectedCategory = btn.dataset.cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function setCategoryByValue(value) {
+    const cat = value || 'その他';
+    selectedCategory = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.cat === cat);
+    });
+  }
+
+  // ── フィルタータブ ──
+  function setFilter(btn) {
+    activeFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // 選択モード中はリセット
+    if (selectMode) {
+      selectMode = false;
+      selectedIdxs.clear();
+      document.getElementById('btn-select').textContent = '選択';
+      document.getElementById('btn-select').classList.remove('active');
+      document.getElementById('btn-delete-selected').style.display = 'none';
+    }
+    renderHistory();
+  }
+
+  // ── 価格フォーマット ──
+  function formatPriceInput(el) {
+    const raw = el.value.replace(/[^\d]/g, '');
+    el.value = raw ? Number(raw).toLocaleString('ja-JP') : '';
+  }
+
+  function getRawPrice() {
+    return document.getElementById('inp-price').value.replace(/[^\d]/g, '');
+  }
+
+  // ── 履歴 ──
+  function save() {
+    docRef.set({ list: records });
+  }
+
+  function addHistory(keyword, price, category) {
+    const entry = { keyword, price, category, datetime: formatDatetime(new Date()) };
+    const filtered = records.filter(h => !(h.keyword === keyword && h.price === price && h.category === category));
+    filtered.unshift(entry);
+    records = filtered.slice(0, MAX_HISTORY);
+    save();
+  }
+
+  // ── 選択モード ──
+  function toggleSelectMode() {
+    selectMode = !selectMode;
+    selectedIdxs.clear();
+    const btn = document.getElementById('btn-select');
+    btn.textContent = selectMode ? 'キャンセル' : '選択';
+    btn.classList.toggle('active', selectMode);
+    document.getElementById('btn-delete-selected').style.display = 'none';
+    renderHistory();
+  }
+
+  function toggleSelectItem(fullIdx) {
+    if (selectedIdxs.has(fullIdx)) selectedIdxs.delete(fullIdx);
+    else selectedIdxs.add(fullIdx);
+    renderHistory();
+  }
+
+  function deleteSelected() {
+    if (!selectedIdxs.size) return;
+    records = records.filter((_, i) => !selectedIdxs.has(i));
+    save();
+    selectedIdxs.clear();
+    selectMode = false;
+    document.getElementById('btn-select').textContent = '選択';
+    document.getElementById('btn-select').classList.remove('active');
+    document.getElementById('btn-delete-selected').style.display = 'none';
+    renderHistory();
+  }
+
+  // ── 描画 ──
+  function renderHistory() {
+    const list = document.getElementById('records-list');
+    const filtered = records
+      .map((h, i) => ({ ...h, _fullIdx: i }))
+      .filter(h => activeFilter === '全て' || (h.category || 'その他') === activeFilter);
+
+    list.classList.toggle('select-mode', selectMode);
+
+    // 削除ボタンの状態を常に同期
+    const delBtn = document.getElementById('btn-delete-selected');
+    delBtn.style.display = selectMode && selectedIdxs.size > 0 ? 'inline-block' : 'none';
+    if (selectedIdxs.size > 0) delBtn.textContent = `削除（${selectedIdxs.size}件）`;
+
+    if (!filtered.length) {
+      list.innerHTML = '<div class="records-empty">履歴がありません</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(h => {
+      const cat = h.category || 'その他';
+      const isSelected = selectedIdxs.has(h._fullIdx);
+      return `
+        <div class="records-item${isSelected ? ' selected' : ''}" data-idx="${h._fullIdx}" onclick="onItemClick(${h._fullIdx})">
+          <div class="records-check"><input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelectItem(${h._fullIdx})"></div>
+          <div class="records-item-body">
+            <div class="records-top">
+              <div class="records-keyword">${h.keyword.replace(/</g, '&lt;')}</div>
+              <span class="cat-badge ${cat}">${cat}</span>
+            </div>
+            <div class="records-meta">
+              <span class="records-price">${h.price ? '¥' + Number(h.price).toLocaleString('ja-JP') + ' 以上' : '下限なし'}</span>
+              <span>${h.datetime}</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">
+            <button class="btn-records-edit" onclick="event.stopPropagation(); editHistory(${h._fullIdx})">編集</button>
+            <span class="records-arrow">›</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function onItemClick(fullIdx) {
+    if (selectMode) { toggleSelectItem(fullIdx); return; }
+    searchFromHistory(fullIdx);
+  }
+
+  function searchFromHistory(fullIdx) {
+    const h = records[fullIdx];
+    if (!h) return;
+    setCategoryByValue(h.category);
+    document.getElementById('inp-keyword').value = h.keyword;
+    document.getElementById('inp-price').value = h.price ? Number(h.price).toLocaleString('ja-JP') : '';
+    openSearch(h.keyword, h.price);
+  }
+
+  // ── 検索 ──
+  function formatDatetime(d) {
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+
+  function editHistory(fullIdx) {
+    const h = records[fullIdx];
+    if (!h) return;
+    editingIdx = fullIdx;
+    setCategoryByValue(h.category);
+    document.getElementById('inp-keyword').value = h.keyword;
+    document.getElementById('inp-price').value = h.price ? Number(h.price).toLocaleString('ja-JP') : '';
+    document.getElementById('form-title').textContent = '編集中';
+    document.getElementById('btn-search').textContent = '更新する';
+    document.getElementById('btn-search').classList.add('editing');
+    document.getElementById('btn-cancel-edit').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelEdit() {
+    editingIdx = null;
+    setCategoryByValue('その他');
+    document.getElementById('inp-keyword').value = '';
+    document.getElementById('inp-price').value = '';
+    document.getElementById('form-title').textContent = '新規検索';
+    document.getElementById('btn-search').textContent = '検索する';
+    document.getElementById('btn-search').classList.remove('editing');
+    document.getElementById('btn-cancel-edit').style.display = 'none';
+  }
+
+  function search() {
+    const keyword = document.getElementById('inp-keyword').value.trim();
+    if (!keyword) { document.getElementById('inp-keyword').focus(); return; }
+    const price = getRawPrice();
+
+    if (editingIdx !== null) {
+      if (records[editingIdx]) {
+        records[editingIdx] = { ...records[editingIdx], keyword, price, category: selectedCategory };
+        save();
+      }
+      cancelEdit();
+      return;
+    }
+
+    addHistory(keyword, price, selectedCategory);
+    openSearch(keyword, price);
+  }
+
+  function openSearch(keyword, price) {
+    const term = encodeURIComponent(keyword).replace(/%20/g, '+');
+    const pf = price ? `&pf=${price}` : '';
+    const url = `https://shopping.yahoo.co.jp/search/${term}/0/?X=12&tab_ex=commerce&area=14&sc_i=shopping-pc-web-result-item-prcrange-fltrbtn${pf}`;
+    window.open(url, '_blank');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') search();
+  });
+
+  document.getElementById('records-list').innerHTML = '<div class="records-empty">読み込み中...</div>';
+  docRef.onSnapshot(snap => {
+    records = snap.exists ? (snap.data().list || []) : [];
+    renderHistory();
+  });
+</script>
+
+</body>
+</html>
