@@ -107,6 +107,8 @@
     .cat-btn[data-cat="遊戯王カード"].active     { background: #1a0a2e; border-color: #5b2a8e; color: #a855f7; }
     .cat-btn[data-cat="ワンピースカード"].active { background: #2e0a0a; border-color: #8e2a2a; color: #f87171; }
     .cat-btn[data-cat="ゲーム"].active           { background: #0a2020; border-color: #0e6060; color: #2dd4bf; }
+    .cat-btn[data-cat="その他トレカ"].active     { background: #1a2a1a; border-color: #2a6a2a; color: #4ade80; }
+    .cat-btn[data-cat="フィギュア"].active       { background: #2a1a2e; border-color: #7a2a8e; color: #e879f9; }
     .cat-btn[data-cat="その他"].active           { background: #1a2535; border-color: #4a90d9; color: #4a90d9; }
 
     .form-header {
@@ -186,7 +188,7 @@
       flex: 1;
     }
 
-    .btn-select-records, .btn-delete-selected {
+    .btn-select-records, .btn-duplicate-selected, .btn-delete-selected {
       font-size: 0.72rem;
       color: #8899aa;
       background: none;
@@ -197,6 +199,7 @@
       white-space: nowrap;
     }
     .btn-select-records.active { color: #fbbf24; border-color: #92400e; background: #1c1408; }
+    .btn-duplicate-selected:hover { color: #4ade80; border-color: #4ade80; }
     .btn-delete-selected:hover { color: #e53e3e; border-color: #e53e3e; }
 
     /* フィルタータブ */
@@ -283,6 +286,8 @@
     .cat-badge.遊戯王カード     { background: #1a0a2e; border: 1px solid #5b2a8e; color: #a855f7; }
     .cat-badge.ワンピースカード { background: #2e0a0a; border: 1px solid #8e2a2a; color: #f87171; }
     .cat-badge.ゲーム           { background: #0a2020; border: 1px solid #0e6060; color: #2dd4bf; }
+    .cat-badge.その他トレカ     { background: #1a2a1a; border: 1px solid #2a6a2a; color: #4ade80; }
+    .cat-badge.フィギュア       { background: #2a1a2e; border: 1px solid #7a2a8e; color: #e879f9; }
     .cat-badge.その他           { background: #1a2535; border: 1px solid #2a3a50; color: #6a7a8a; }
 
     .records-meta {
@@ -294,6 +299,52 @@
     .records-price { color: #4a90d9; font-weight: bold; }
 
     .records-arrow { font-size: 0.85rem; color: #2a3a50; flex-shrink: 0; }
+
+    .records-item-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* ── 並び替えモード ── */
+    .drag-handle {
+      display: none;
+      font-size: 1.2rem;
+      color: #4a5568;
+      padding: 4px 8px;
+      cursor: grab;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+    }
+    .reorder-mode .drag-handle { display: block; }
+    .reorder-mode .btn-records-edit { display: none !important; }
+    .reorder-mode .records-arrow { display: none !important; }
+    .records-item { transition: border-color 0.15s, background 0.15s, transform 0.18s ease; }
+    .records-item.dragging { opacity: 0.15; }
+    .drag-ghost {
+      position: fixed;
+      pointer-events: none;
+      z-index: 500;
+      background: #111827;
+      border: 1px solid #2563eb;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      opacity: 0.92;
+      transition: none !important;
+    }
+    .btn-done-reorder {
+      display: none;
+      font-size: 0.72rem;
+      color: #4ade80;
+      background: none;
+      border: 1px solid #4ade80;
+      border-radius: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -312,7 +363,9 @@
         <button class="cat-btn" data-cat="ポケモンカード" onclick="selectCategory(this)">ポケモンカード</button>
         <button class="cat-btn" data-cat="遊戯王カード"     onclick="selectCategory(this)">遊戯王カード</button>
         <button class="cat-btn" data-cat="ワンピースカード" onclick="selectCategory(this)">ワンピースカード</button>
+        <button class="cat-btn" data-cat="その他トレカ"   onclick="selectCategory(this)">その他トレカ</button>
         <button class="cat-btn" data-cat="ゲーム"           onclick="selectCategory(this)">ゲーム</button>
+        <button class="cat-btn" data-cat="フィギュア"     onclick="selectCategory(this)">フィギュア</button>
         <button class="cat-btn active" data-cat="その他"  onclick="selectCategory(this)">その他</button>
       </div>
     </div>
@@ -337,6 +390,8 @@
     <div class="records-header">
       <h2>検索履歴</h2>
       <button class="btn-select-records" id="btn-select" onclick="toggleSelectMode()">選択</button>
+      <button class="btn-done-reorder" id="btn-done-reorder" onclick="exitReorderMode()">完了</button>
+      <button class="btn-duplicate-selected" id="btn-duplicate-selected" onclick="duplicateSelected()" style="display:none">複製</button>
       <button class="btn-delete-selected" id="btn-delete-selected" onclick="deleteSelected()" style="display:none">削除</button>
     </div>
     <div class="filter-tabs" id="filter-tabs">
@@ -344,7 +399,9 @@
       <button class="filter-tab"        data-filter="ポケモンカード" onclick="setFilter(this)">ポケモンカード</button>
       <button class="filter-tab"        data-filter="遊戯王カード"     onclick="setFilter(this)">遊戯王カード</button>
       <button class="filter-tab"        data-filter="ワンピースカード" onclick="setFilter(this)">ワンピースカード</button>
+      <button class="filter-tab"        data-filter="その他トレカ"   onclick="setFilter(this)">その他トレカ</button>
       <button class="filter-tab"        data-filter="ゲーム"           onclick="setFilter(this)">ゲーム</button>
+      <button class="filter-tab"        data-filter="フィギュア"     onclick="setFilter(this)">フィギュア</button>
       <button class="filter-tab"        data-filter="その他"          onclick="setFilter(this)">その他</button>
     </div>
     <div id="records-list"></div>
@@ -372,6 +429,10 @@
   let selectedCategory = 'その他';
   let activeFilter = '全て';
   let editingIdx = null;
+  let reorderMode = false;
+  let dragState = null;
+  let longPressTimer = null;
+  let longPressStart = { x: 0, y: 0 };
 
   // ── カテゴリ選択 ──
   function selectCategory(btn) {
@@ -437,6 +498,7 @@
     const btn = document.getElementById('btn-select');
     btn.textContent = selectMode ? 'キャンセル' : '選択';
     btn.classList.toggle('active', selectMode);
+    document.getElementById('btn-duplicate-selected').style.display = 'none';
     document.getElementById('btn-delete-selected').style.display = 'none';
     renderHistory();
   }
@@ -444,6 +506,23 @@
   function toggleSelectItem(fullIdx) {
     if (selectedIdxs.has(fullIdx)) selectedIdxs.delete(fullIdx);
     else selectedIdxs.add(fullIdx);
+    renderHistory();
+  }
+
+  function duplicateSelected() {
+    if (!selectedIdxs.size) return;
+    const now = formatDatetime(new Date());
+    const copies = [...selectedIdxs]
+      .sort((a, b) => a - b)
+      .map(i => ({ ...records[i], datetime: now }));
+    records = [...copies, ...records].slice(0, MAX_HISTORY);
+    save();
+    selectedIdxs.clear();
+    selectMode = false;
+    document.getElementById('btn-select').textContent = '選択';
+    document.getElementById('btn-select').classList.remove('active');
+    document.getElementById('btn-duplicate-selected').style.display = 'none';
+    document.getElementById('btn-delete-selected').style.display = 'none';
     renderHistory();
   }
 
@@ -455,6 +534,7 @@
     selectMode = false;
     document.getElementById('btn-select').textContent = '選択';
     document.getElementById('btn-select').classList.remove('active');
+    document.getElementById('btn-duplicate-selected').style.display = 'none';
     document.getElementById('btn-delete-selected').style.display = 'none';
     renderHistory();
   }
@@ -467,14 +547,54 @@
       .filter(h => activeFilter === '全て' || (h.category || 'その他') === activeFilter);
 
     list.classList.toggle('select-mode', selectMode);
+    list.classList.toggle('reorder-mode', reorderMode);
 
-    // 削除ボタンの状態を常に同期
+    // 複製・削除ボタンの状態を常に同期
+    const dupBtn = document.getElementById('btn-duplicate-selected');
     const delBtn = document.getElementById('btn-delete-selected');
-    delBtn.style.display = selectMode && selectedIdxs.size > 0 ? 'inline-block' : 'none';
-    if (selectedIdxs.size > 0) delBtn.textContent = `削除（${selectedIdxs.size}件）`;
+    const show = selectMode && selectedIdxs.size > 0;
+    dupBtn.style.display = show ? 'inline-block' : 'none';
+    delBtn.style.display = show ? 'inline-block' : 'none';
+    if (show) {
+      dupBtn.textContent = `複製（${selectedIdxs.size}件）`;
+      delBtn.textContent = `削除（${selectedIdxs.size}件）`;
+    }
 
     if (!filtered.length) {
       list.innerHTML = '<div class="records-empty">履歴がありません</div>';
+      return;
+    }
+
+    // reorderMode は全て表示で動作
+    if (reorderMode) {
+      list.innerHTML = records.map((h, i) => {
+        const cat = h.category || 'その他';
+        return `
+          <div class="records-item" data-idx="${i}" onclick="onItemClick(${i})">
+            <div class="records-check"><input type="checkbox" onclick="event.stopPropagation(); toggleSelectItem(${i})"></div>
+            <div class="records-item-body">
+              <div class="records-top">
+                <div class="records-keyword">${h.keyword.replace(/</g, '&lt;')}</div>
+                <span class="cat-badge ${cat}">${cat}</span>
+              </div>
+              <div class="records-meta">
+                <span class="records-price">${h.price ? '¥' + Number(h.price).toLocaleString('ja-JP') + ' 以上' : '下限なし'}</span>
+                <span>${h.datetime}</span>
+              </div>
+            </div>
+            <div class="records-item-right">
+              <button class="btn-records-edit" onclick="event.stopPropagation(); editHistory(${i})">編集</button>
+              <span class="records-arrow">›</span>
+              <span class="drag-handle" data-idx="${i}">☰</span>
+            </div>
+          </div>`;
+      }).join('');
+      list.querySelectorAll('.drag-handle').forEach(handle => {
+        handle.addEventListener('touchstart', e => {
+          e.preventDefault();
+          startDrag(e, Number(handle.dataset.idx));
+        }, { passive: false });
+      });
       return;
     }
 
@@ -494,15 +614,17 @@
               <span>${h.datetime}</span>
             </div>
           </div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">
+          <div class="records-item-right">
             <button class="btn-records-edit" onclick="event.stopPropagation(); editHistory(${h._fullIdx})">編集</button>
             <span class="records-arrow">›</span>
+            <span class="drag-handle" data-idx="${h._fullIdx}">☰</span>
           </div>
         </div>`;
     }).join('');
   }
 
   function onItemClick(fullIdx) {
+    if (reorderMode) return;
     if (selectMode) { toggleSelectItem(fullIdx); return; }
     searchFromHistory(fullIdx);
   }
@@ -573,12 +695,117 @@
     window.open(url, '_blank');
   }
 
+  // ── 並び替えモード ──
+  function enterReorderMode() {
+    if (selectMode) toggleSelectMode();
+    activeFilter = '全て';
+    document.querySelectorAll('.filter-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.filter === '全て');
+    });
+    reorderMode = true;
+    document.getElementById('btn-select').style.display = 'none';
+    document.getElementById('btn-done-reorder').style.display = '';
+    renderHistory();
+    if (navigator.vibrate) navigator.vibrate(40);
+  }
+
+  function exitReorderMode() {
+    reorderMode = false;
+    document.getElementById('btn-select').style.display = '';
+    document.getElementById('btn-done-reorder').style.display = 'none';
+    renderHistory();
+  }
+
+  function startDrag(e, fullIdx) {
+    const cardEl = document.querySelector(`.records-item[data-idx="${fullIdx}"]`);
+    if (!cardEl) return;
+    const rect = cardEl.getBoundingClientRect();
+    const touch = e.touches[0];
+    const ghost = cardEl.cloneNode(true);
+    ghost.className = 'records-item drag-ghost';
+    ghost.style.left  = `${rect.left}px`;
+    ghost.style.top   = `${rect.top}px`;
+    ghost.style.width = `${rect.width}px`;
+    document.body.appendChild(ghost);
+    cardEl.classList.add('dragging');
+    dragState = { fullIdx, cardEl, ghost, offsetY: touch.clientY - rect.top, startY: touch.clientY, moved: false, targetIdx: null };
+  }
+
+  function moveDrag(e) {
+    if (!dragState) return;
+    const touch = e.touches[0];
+    const { ghost, offsetY } = dragState;
+    if (Math.abs(touch.clientY - dragState.startY) > 8) dragState.moved = true;
+    ghost.style.top = `${Math.max(60, touch.clientY - offsetY)}px`;
+    if (!dragState.moved) return;
+
+    const allCards = [...document.querySelectorAll('.records-item:not(.drag-ghost)')];
+    const srcIdx = dragState.fullIdx;
+    const cy = touch.clientY;
+    let targetIdx = allCards.length;
+    for (let i = 0; i < allCards.length; i++) {
+      if (i === srcIdx) continue;
+      const rb = allCards[i].getBoundingClientRect();
+      const matrix = new DOMMatrix(getComputedStyle(allCards[i]).transform);
+      if (cy < rb.top - matrix.m42 + rb.height / 2) { targetIdx = i; break; }
+    }
+    dragState.targetIdx = targetIdx;
+    const shiftPx = (allCards[srcIdx]?.getBoundingClientRect().height ?? 0) + 8;
+    allCards.forEach((c, i) => {
+      if (i === srcIdx) return;
+      if (targetIdx <= srcIdx)
+        c.style.transform = (i >= targetIdx && i < srcIdx) ? `translateY(${shiftPx}px)` : '';
+      else
+        c.style.transform = (i > srcIdx && i <= targetIdx - 1) ? `translateY(-${shiftPx}px)` : '';
+    });
+  }
+
+  function endDrag() {
+    if (!dragState) return;
+    const { ghost, cardEl, fullIdx, targetIdx, moved } = dragState;
+    ghost.remove();
+    cardEl.classList.remove('dragging');
+    document.querySelectorAll('.records-item:not(.drag-ghost)').forEach(c => c.style.transform = '');
+    dragState = null;
+    if (!moved) { exitReorderMode(); return; }
+    if (targetIdx === null || targetIdx === fullIdx) { renderHistory(); return; }
+    const newRecords = [...records];
+    const [item] = newRecords.splice(fullIdx, 1);
+    newRecords.splice(targetIdx > fullIdx ? targetIdx - 1 : targetIdx, 0, item);
+    records = newRecords;
+    save();
+    renderHistory();
+  }
+
+  // ── 長押しでリオーダーモード突入 ──
+  const listEl = document.getElementById('records-list');
+  listEl.addEventListener('touchstart', e => {
+    if (reorderMode || selectMode) return;
+    const card = e.target.closest('.records-item');
+    if (!card || e.target.closest('button') || e.target.closest('input')) return;
+    longPressStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    longPressTimer = setTimeout(() => { longPressTimer = null; enterReorderMode(); }, 600);
+  }, { passive: true });
+  listEl.addEventListener('touchmove', e => {
+    if (!longPressTimer) return;
+    if (Math.abs(e.touches[0].clientX - longPressStart.x) > 10 || Math.abs(e.touches[0].clientY - longPressStart.y) > 10) {
+      clearTimeout(longPressTimer); longPressTimer = null;
+    }
+  }, { passive: true });
+  listEl.addEventListener('touchend', () => {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => { if (dragState) { e.preventDefault(); moveDrag(e); } }, { passive: false });
+  document.addEventListener('touchend', () => { if (dragState) endDrag(); });
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter') search();
   });
 
   document.getElementById('records-list').innerHTML = '';
   docRef.onSnapshot(snap => {
+    if (dragState) return;
     records = snap.exists ? (snap.data().list || []) : [];
     renderHistory();
   });
