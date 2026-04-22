@@ -322,6 +322,8 @@
     @media (hover: hover) and (pointer: fine) {
       #records-list:not(.select-mode) .drag-handle { display: block; }
       .records-item-right { flex-direction: row; align-items: center; }
+      /* ハンドルを編集ボタンと同程度の高さに揃えることでrow内の中央ずれを最小化 */
+      .drag-handle { padding: 2px 6px; font-size: 1rem; }
       /* 並び替えモード以外は上揃えにしてバッジと右側ボタン群の高さを合わせる */
       #records-list:not(.reorder-mode) .records-item { align-items: flex-start; }
     }
