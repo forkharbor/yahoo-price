@@ -318,9 +318,10 @@
       touch-action: none;
     }
     .reorder-mode .drag-handle { display: block; }
-    /* PC: 選択モード以外ではハンドルをホバー時に常時表示 */
+    /* PC: 選択モード以外ではハンドルを常時表示、右側要素を横並びでスリムに */
     @media (hover: hover) and (pointer: fine) {
       #records-list:not(.select-mode) .drag-handle { display: block; }
+      .records-item-right { flex-direction: row; align-items: center; }
     }
     .reorder-mode .btn-records-edit { display: none !important; }
     .reorder-mode .records-arrow { display: none !important; }
