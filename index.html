@@ -322,6 +322,8 @@
     @media (hover: hover) and (pointer: fine) {
       #records-list:not(.select-mode) .drag-handle { display: block; }
       .records-item-right { flex-direction: row; align-items: center; }
+      /* 並び替えモード以外は上揃えにしてバッジと右側ボタン群の高さを合わせる */
+      #records-list:not(.reorder-mode) .records-item { align-items: flex-start; }
     }
     .reorder-mode .btn-records-edit { display: none !important; }
     .reorder-mode .records-arrow { display: none !important; }
