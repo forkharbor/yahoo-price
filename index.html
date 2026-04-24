@@ -796,25 +796,19 @@
     cardEl.classList.add('dragging');
     document.body.style.cursor = 'grabbing';
     document.body.style.userSelect = 'none';
-    dragState = { filterIdx, cardEl, ghost, offsetY: clientY - rect.top, startY: clientY, moved: false, targetIdx: null };
+    dragState = { filterIdx, cardEl, ghost, offsetY: clientY - rect.top, startY: clientY, moved: false, targetIdx: null, scrollTimer: null, lastClientY: clientY };
   }
 
-  function moveDragAt(clientY) {
+  function updateDragPositions(clientY) {
     if (!dragState) return;
-    const { ghost, offsetY } = dragState;
-    if (Math.abs(clientY - dragState.startY) > 8) dragState.moved = true;
-    ghost.style.top = `${Math.max(60, clientY - offsetY)}px`;
-    if (!dragState.moved) return;
-
     const allCards = [...document.querySelectorAll('.records-item:not(.drag-ghost)')];
     const srcIdx = dragState.filterIdx;
-    const cy = clientY;
     let targetIdx = allCards.length;
     for (let i = 0; i < allCards.length; i++) {
       if (i === srcIdx) continue;
       const rb = allCards[i].getBoundingClientRect();
       const matrix = new DOMMatrix(getComputedStyle(allCards[i]).transform);
-      if (cy < rb.top - matrix.m42 + rb.height / 2) { targetIdx = i; break; }
+      if (clientY < rb.top - matrix.m42 + rb.height / 2) { targetIdx = i; break; }
     }
     dragState.targetIdx = targetIdx;
     const shiftPx = (allCards[srcIdx]?.getBoundingClientRect().height ?? 0) + 8;
@@ -827,9 +821,39 @@
     });
   }
 
+  function moveDragAt(clientY) {
+    if (!dragState) return;
+    const { ghost, offsetY } = dragState;
+    if (Math.abs(clientY - dragState.startY) > 8) dragState.moved = true;
+    dragState.lastClientY = clientY;
+    ghost.style.top = `${clientY - offsetY}px`;
+    if (!dragState.moved) return;
+
+    updateDragPositions(clientY);
+
+    // 画面端で自動スクロール
+    clearInterval(dragState.scrollTimer);
+    dragState.scrollTimer = null;
+    const ZONE = 80, MAX_SPEED = 12;
+    if (clientY < ZONE) {
+      const speed = MAX_SPEED * (1 - clientY / ZONE);
+      dragState.scrollTimer = setInterval(() => {
+        window.scrollBy(0, -speed);
+        if (dragState) updateDragPositions(dragState.lastClientY);
+      }, 16);
+    } else if (clientY > window.innerHeight - ZONE) {
+      const speed = MAX_SPEED * ((clientY - (window.innerHeight - ZONE)) / ZONE);
+      dragState.scrollTimer = setInterval(() => {
+        window.scrollBy(0, speed);
+        if (dragState) updateDragPositions(dragState.lastClientY);
+      }, 16);
+    }
+  }
+
   function endDrag() {
     if (!dragState) return;
     const { ghost, cardEl, filterIdx, targetIdx, moved } = dragState;
+    clearInterval(dragState.scrollTimer);
     ghost.remove();
     cardEl.classList.remove('dragging');
     document.querySelectorAll('.records-item:not(.drag-ghost)').forEach(c => c.style.transform = '');
