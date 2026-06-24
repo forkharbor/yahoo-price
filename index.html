@@ -475,7 +475,7 @@
   const db = firebase.firestore();
   const docRef = db.collection('data').doc('yahoo-price');
 
-  const MAX_HISTORY = 100;
+  const MAX_HISTORY = 300;
   let records = [];
   let selectMode = false;
   let selectedIdxs = new Set();
