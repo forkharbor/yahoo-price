@@ -271,6 +271,22 @@
       white-space: nowrap;
     }
     .filter-tab.active { background: #1d4ed8; border-color: #2563eb; color: #fff; font-weight: bold; }
+    .filter-label {
+      margin-bottom: 6px;
+      color: #9f8a81;
+      font-size: 0.68rem;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+    }
+    .main-filter-tabs { margin-bottom: 10px; }
+    .main-filter-tab { padding: 7px 14px; font-size: 0.78rem; }
+    .sub-filter-wrap {
+      display: none;
+      margin: 0 0 12px 10px;
+      padding-left: 10px;
+      border-left: 3px solid #f4c4bd;
+    }
+    .sub-filter-wrap.visible { display: block; }
 
     .records-empty {
       text-align: center;
@@ -582,24 +598,17 @@
       <button class="btn-duplicate-selected" id="btn-duplicate-selected" onclick="duplicateSelected()" style="display:none">複製</button>
       <button class="btn-delete-selected" id="btn-delete-selected" onclick="deleteSelected()" style="display:none">削除</button>
     </div>
-    <div class="filter-tabs" id="filter-tabs">
-      <button class="filter-tab active" data-filter="全て" onclick="setFilter(this)">すべて</button>
-      <button class="filter-tab" data-filter="ポケモン" onclick="setFilter(this)">ポケモン</button>
-      <button class="filter-tab" data-filter="ワンピ" onclick="setFilter(this)">ワンピ</button>
-      <button class="filter-tab" data-filter="遊戯王" onclick="setFilter(this)">遊戯王</button>
-      <button class="filter-tab" data-filter="ガンダム" onclick="setFilter(this)">ガンダム</button>
-      <button class="filter-tab" data-filter="ロルカナ" onclick="setFilter(this)">ロルカナ</button>
-      <button class="filter-tab" data-filter="デュエマ" onclick="setFilter(this)">デュエマ</button>
-      <button class="filter-tab" data-filter="ドラゴン" onclick="setFilter(this)">ドラゴン</button>
-      <button class="filter-tab" data-filter="ユニアリ" onclick="setFilter(this)">ユニアリ</button>
-      <button class="filter-tab" data-filter="ヴァイス" onclick="setFilter(this)">ヴァイス</button>
-      <button class="filter-tab" data-filter="ホロライブ" onclick="setFilter(this)">ホロライブ</button>
-      <button class="filter-tab" data-filter="コナン" onclick="setFilter(this)">コナン</button>
-      <button class="filter-tab" data-filter="サプライ" onclick="setFilter(this)">サプライ</button>
-      <button class="filter-tab" data-filter="ゲーム機・ゲーム関連" onclick="setFilter(this)">ゲーム機・ゲーム関連</button>
-      <button class="filter-tab" data-filter="スマートフォン" onclick="setFilter(this)">スマートフォン</button>
-      <button class="filter-tab" data-filter="おもちゃ・ホビー・フィギュア" onclick="setFilter(this)">おもちゃ・ホビー・フィギュア</button>
-      <button class="filter-tab" data-filter="文房具（ステーショナリー）" onclick="setFilter(this)">文房具（ステーショナリー）</button>
+    <div class="filter-label">大カテゴリ</div>
+    <div class="filter-tabs main-filter-tabs" id="main-filter-tabs">
+      <button class="filter-tab main-filter-tab active" data-main-filter="全て" onclick="setMainFilter(this)">すべて</button>
+      <button class="filter-tab main-filter-tab" data-main-filter="トレカ" onclick="setMainFilter(this)">トレカ</button>
+      <button class="filter-tab main-filter-tab" data-main-filter="ゲーム・デジタル" onclick="setMainFilter(this)">ゲーム・デジタル</button>
+      <button class="filter-tab main-filter-tab" data-main-filter="ホビー" onclick="setMainFilter(this)">ホビー</button>
+      <button class="filter-tab main-filter-tab" data-main-filter="文房具" onclick="setMainFilter(this)">文房具</button>
+    </div>
+    <div class="sub-filter-wrap" id="sub-filter-wrap">
+      <div class="filter-label">小カテゴリ</div>
+      <div class="filter-tabs" id="filter-tabs"></div>
     </div>
     <div id="records-list"></div>
   </div>
@@ -638,6 +647,7 @@
   let selectMode = false;
   let selectedIdxs = new Set();
   let selectedCategory = 'ポケモン';
+  let activeMainFilter = '全て';
   let activeFilter = '全て';
   let editingIdx = null;
   let reorderMode = false;
@@ -683,19 +693,61 @@
     return legacyCategories[value] || value || 'ポケモン';
   }
 
+  const CATEGORY_GROUPS = {
+    'トレカ': ['ポケモン', 'ワンピ', '遊戯王', 'ガンダム', 'ロルカナ', 'デュエマ', 'ドラゴン', 'ユニアリ', 'ヴァイス', 'ホロライブ', 'コナン', 'サプライ'],
+    'ゲーム・デジタル': ['ゲーム機・ゲーム関連', 'スマートフォン'],
+    'ホビー': ['おもちゃ・ホビー・フィギュア'],
+    '文房具': ['文房具（ステーショナリー）']
+  };
+
+  function getMainCategory(category) {
+    const cat = normalizeCategory(category);
+    if (cat === 'その他トレカ') return 'トレカ';
+    return Object.keys(CATEGORY_GROUPS).find(group => CATEGORY_GROUPS[group].includes(cat)) || 'その他';
+  }
+
+  function matchesActiveFilter(category) {
+    const cat = normalizeCategory(category);
+    if (activeFilter !== '全て') return cat === activeFilter;
+    return activeMainFilter === '全て' || getMainCategory(cat) === activeMainFilter;
+  }
+
   // ── フィルタータブ ──
+  function setMainFilter(btn) {
+    activeMainFilter = btn.dataset.mainFilter;
+    activeFilter = '全て';
+    document.querySelectorAll('.main-filter-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderSubFilters();
+    resetSelectModeForFilter();
+    renderHistory();
+  }
+
+  function renderSubFilters() {
+    const wrap = document.getElementById('sub-filter-wrap');
+    const tabs = document.getElementById('filter-tabs');
+    const categories = CATEGORY_GROUPS[activeMainFilter];
+    wrap.classList.toggle('visible', !!categories);
+    tabs.innerHTML = categories
+      ? categories.map(cat => `<button class="filter-tab" data-filter="${cat}" onclick="setFilter(this)">${cat}</button>`).join('')
+      : '';
+  }
+
+  function resetSelectModeForFilter() {
+    if (!selectMode) return;
+    selectMode = false;
+    selectedIdxs.clear();
+    document.getElementById('btn-select').textContent = '選択';
+    document.getElementById('btn-select').classList.remove('active');
+    document.getElementById('btn-duplicate-selected').style.display = 'none';
+    document.getElementById('btn-delete-selected').style.display = 'none';
+  }
+
   function setFilter(btn) {
     activeFilter = btn.dataset.filter;
-    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#filter-tabs .filter-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    // 選択モード中はリセット
-    if (selectMode) {
-      selectMode = false;
-      selectedIdxs.clear();
-      document.getElementById('btn-select').textContent = '選択';
-      document.getElementById('btn-select').classList.remove('active');
-      document.getElementById('btn-delete-selected').style.display = 'none';
-    }
+    resetSelectModeForFilter();
     renderHistory();
   }
 
@@ -836,7 +888,7 @@
     const list = document.getElementById('records-list');
     const filtered = records
       .map((h, i) => ({ ...h, _fullIdx: i }))
-      .filter(h => activeFilter === '全て' || normalizeCategory(h.category) === activeFilter);
+      .filter(h => matchesActiveFilter(h.category));
 
     list.classList.toggle('select-mode', selectMode);
     list.classList.toggle('reorder-mode', reorderMode);
@@ -1099,7 +1151,7 @@
     // フィルター済みリストのスナップショット
     const filtered = records
       .map((h, i) => ({ ...h, _fullIdx: i }))
-      .filter(h => activeFilter === '全て' || normalizeCategory(h.category) === activeFilter);
+      .filter(h => matchesActiveFilter(h.category));
 
     // フィルター内で並び替え
     const newFiltered = [...filtered];
