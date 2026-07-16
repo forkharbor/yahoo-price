@@ -101,6 +101,9 @@
       white-space: nowrap;
     }
     .cat-btn.active {
+      background: #0f2d55;
+      border-color: #2563eb;
+      color: #93c5fd;
       font-weight: bold;
     }
     .cat-btn[data-cat="ポケモンカード"].active { background: #2a1a00; border-color: #7a4a00; color: #f0b030; }
@@ -165,6 +168,54 @@
     }
     .btn-records-edit:hover { background: #1a2a40; }
     .select-mode .btn-records-edit { display: none; }
+    .btn-admin, .btn-star {
+      font-size: 0.7rem;
+      color: #8899aa;
+      background: none;
+      border: 1px solid #2a3a50;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-admin.active { color: #d97706; border-color: #f59e0b; background: #fffbeb; }
+    .btn-star { display: none; color: #b08900; border-color: #e8cf78; }
+    .admin-mode .btn-star { display: inline-block; }
+    .history-star { color: #e3aa18; font-size: 1rem; flex-shrink: 0; }
+    .password-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(67, 49, 42, 0.28);
+    }
+    .password-dialog {
+      width: 100%;
+      max-width: 360px;
+      padding: 24px;
+      border: 1px solid #eaded8;
+      border-radius: 14px;
+      background: #ffffff;
+      box-shadow: 0 18px 50px rgba(78, 53, 43, 0.2);
+    }
+    .password-dialog h3 { margin-bottom: 8px; color: #493a35; font-size: 1rem; }
+    .password-dialog p { margin-bottom: 14px; color: #806a61; font-size: 0.82rem; line-height: 1.5; }
+    .password-dialog input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #dfd0c9;
+      border-radius: 8px;
+      outline: none;
+      font-size: 1rem;
+    }
+    .password-dialog input:focus { border-color: #ef8f88; }
+    .password-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .password-actions button { flex: 1; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .password-cancel { border: 1px solid #dfd0c9; background: #ffffff; color: #806a61; }
+    .password-submit { border: 1px solid #e77f78; background: #ef8f88; color: #ffffff; }
 
     /* ── 履歴 ── */
     .records-section {
@@ -280,6 +331,9 @@
       border-radius: 10px;
       flex-shrink: 0;
       white-space: nowrap;
+      background: #0f2d55;
+      border: 1px solid #2563eb;
+      color: #93c5fd;
     }
     .cat-badge.ポケモンカード { background: #2a1a00; border: 1px solid #7a4a00; color: #f0b030; }
     .cat-badge.遊戯王カード     { background: #1a0a2e; border: 1px solid #5b2a8e; color: #a855f7; }
@@ -389,11 +443,83 @@
     .tab-panel.active { display: flex; flex-direction: column; align-items: center; }
 
     .records-section { margin-top: 0; }
+
+    /* ── 明るいカラーテーマ ── */
+    body { background: #fffaf7; color: #51423d; }
+    h1 { color: #493a35; }
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .title-row h1 { margin-bottom: 0; }
+    .subtitle { color: #a08176; margin-bottom: 36px; }
+    .otter-mascot {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 8px rgba(126, 88, 72, 0.16));
+    }
+    .card, .records-item, .tab-bar {
+      background: #ffffff;
+      border-color: #eaded8;
+      box-shadow: 0 8px 24px rgba(105, 76, 63, 0.08);
+    }
+    .field label { color: #7e6860; }
+    .field input {
+      background: #fffdfb;
+      border-color: #dfd0c9;
+      color: #493a35;
+    }
+    .field input:focus { border-color: #ef8f88; }
+    .field input::placeholder, .price-unit { color: #b9a49b; }
+    .cat-btn, .filter-tab, .btn-cancel-edit {
+      background: #fff7f3;
+      border-color: #ead7ce;
+      color: #806a61;
+    }
+    .cat-btn.active, .filter-tab.active {
+      background: #ef8f88;
+      border-color: #e77f78;
+      color: #ffffff;
+    }
+    .form-title, .records-header h2, .btn-records-edit { color: #de746d; }
+    .btn-search, .tab-btn.active { background: #ef8f88; color: #ffffff; }
+    .btn-search:hover { background: #e78079; }
+    .tab-btn { color: #a38d84; }
+    .records-keyword { color: #51423d; }
+    .records-meta, .records-empty { color: #9f8a81; }
+    .records-price { color: #df746d; }
+    .cat-badge {
+      background: #fff0eb;
+      border-color: #efb2a9;
+      color: #c76059;
+    }
+    .cat-badge.その他トレカ, .cat-badge.その他 {
+      background: #fff0eb;
+      border-color: #efb2a9;
+      color: #c76059;
+    }
+    .records-item:hover, .records-item.selected {
+      border-color: #ef8f88;
+      background: #fff8f5;
+    }
+    .btn-records-edit, .btn-select-records, .btn-duplicate-selected, .btn-delete-selected {
+      border-color: #dfd0c9;
+      background: #ffffff;
+    }
+    .btn-admin, .btn-star { background: #ffffff; border-color: #dfd0c9; color: #947d73; }
+    .records-arrow, .drag-handle { color: #b9a49b; }
   </style>
 </head>
 <body>
 
-  <h1>Yahoo!ショッピング 価格調査</h1>
+  <div class="title-row">
+    <h1>Yahoo!ショッピング 価格調査</h1>
+    <img class="otter-mascot" src="otter.png" alt="貝がらを持ったラッコ">
+  </div>
   <p class="subtitle">価格＋送料が安い順で検索します</p>
 
   <div class="tab-bar">
@@ -410,13 +536,22 @@
     <div class="field">
       <label>カテゴリ</label>
       <div class="cat-btns" id="cat-btns">
-        <button class="cat-btn" data-cat="ポケモンカード" onclick="selectCategory(this)">ポケモンカード</button>
-        <button class="cat-btn" data-cat="遊戯王カード"     onclick="selectCategory(this)">遊戯王カード</button>
-        <button class="cat-btn" data-cat="ワンピースカード" onclick="selectCategory(this)">ワンピースカード</button>
-        <button class="cat-btn" data-cat="その他トレカ"   onclick="selectCategory(this)">その他トレカ</button>
-        <button class="cat-btn" data-cat="ゲーム"           onclick="selectCategory(this)">ゲーム</button>
-        <button class="cat-btn" data-cat="フィギュア"     onclick="selectCategory(this)">フィギュア</button>
-        <button class="cat-btn active" data-cat="その他"  onclick="selectCategory(this)">その他</button>
+        <button class="cat-btn active" data-cat="ポケモン" onclick="selectCategory(this)">ポケモン</button>
+        <button class="cat-btn" data-cat="ワンピ" onclick="selectCategory(this)">ワンピ</button>
+        <button class="cat-btn" data-cat="遊戯王" onclick="selectCategory(this)">遊戯王</button>
+        <button class="cat-btn" data-cat="ガンダム" onclick="selectCategory(this)">ガンダム</button>
+        <button class="cat-btn" data-cat="ロルカナ" onclick="selectCategory(this)">ロルカナ</button>
+        <button class="cat-btn" data-cat="デュエマ" onclick="selectCategory(this)">デュエマ</button>
+        <button class="cat-btn" data-cat="ドラゴン" onclick="selectCategory(this)">ドラゴン</button>
+        <button class="cat-btn" data-cat="ユニアリ" onclick="selectCategory(this)">ユニアリ</button>
+        <button class="cat-btn" data-cat="ヴァイス" onclick="selectCategory(this)">ヴァイス</button>
+        <button class="cat-btn" data-cat="ホロライブ" onclick="selectCategory(this)">ホロライブ</button>
+        <button class="cat-btn" data-cat="コナン" onclick="selectCategory(this)">コナン</button>
+        <button class="cat-btn" data-cat="サプライ" onclick="selectCategory(this)">サプライ</button>
+        <button class="cat-btn" data-cat="ゲーム機・ゲーム関連" onclick="selectCategory(this)">ゲーム機・ゲーム関連</button>
+        <button class="cat-btn" data-cat="スマートフォン" onclick="selectCategory(this)">スマートフォン</button>
+        <button class="cat-btn" data-cat="おもちゃ・ホビー・フィギュア" onclick="selectCategory(this)">おもちゃ・ホビー・フィギュア</button>
+        <button class="cat-btn" data-cat="文房具（ステーショナリー）" onclick="selectCategory(this)">文房具（ステーショナリー）</button>
       </div>
     </div>
 
@@ -441,24 +576,46 @@
   <div class="records-section">
     <div class="records-header">
       <h2>検索履歴</h2>
+      <button class="btn-admin" id="btn-admin" onclick="unlockAdminMode()">★管理</button>
       <button class="btn-select-records" id="btn-select" onclick="toggleSelectMode()">選択</button>
       <button class="btn-done-reorder" id="btn-done-reorder" onclick="exitReorderMode()">完了</button>
       <button class="btn-duplicate-selected" id="btn-duplicate-selected" onclick="duplicateSelected()" style="display:none">複製</button>
       <button class="btn-delete-selected" id="btn-delete-selected" onclick="deleteSelected()" style="display:none">削除</button>
     </div>
     <div class="filter-tabs" id="filter-tabs">
-      <button class="filter-tab active" data-filter="全て"          onclick="setFilter(this)">全て</button>
-      <button class="filter-tab"        data-filter="ポケモンカード" onclick="setFilter(this)">ポケモンカード</button>
-      <button class="filter-tab"        data-filter="遊戯王カード"     onclick="setFilter(this)">遊戯王カード</button>
-      <button class="filter-tab"        data-filter="ワンピースカード" onclick="setFilter(this)">ワンピースカード</button>
-      <button class="filter-tab"        data-filter="その他トレカ"   onclick="setFilter(this)">その他トレカ</button>
-      <button class="filter-tab"        data-filter="ゲーム"           onclick="setFilter(this)">ゲーム</button>
-      <button class="filter-tab"        data-filter="フィギュア"     onclick="setFilter(this)">フィギュア</button>
-      <button class="filter-tab"        data-filter="その他"          onclick="setFilter(this)">その他</button>
+      <button class="filter-tab active" data-filter="全て" onclick="setFilter(this)">すべて</button>
+      <button class="filter-tab" data-filter="ポケモン" onclick="setFilter(this)">ポケモン</button>
+      <button class="filter-tab" data-filter="ワンピ" onclick="setFilter(this)">ワンピ</button>
+      <button class="filter-tab" data-filter="遊戯王" onclick="setFilter(this)">遊戯王</button>
+      <button class="filter-tab" data-filter="ガンダム" onclick="setFilter(this)">ガンダム</button>
+      <button class="filter-tab" data-filter="ロルカナ" onclick="setFilter(this)">ロルカナ</button>
+      <button class="filter-tab" data-filter="デュエマ" onclick="setFilter(this)">デュエマ</button>
+      <button class="filter-tab" data-filter="ドラゴン" onclick="setFilter(this)">ドラゴン</button>
+      <button class="filter-tab" data-filter="ユニアリ" onclick="setFilter(this)">ユニアリ</button>
+      <button class="filter-tab" data-filter="ヴァイス" onclick="setFilter(this)">ヴァイス</button>
+      <button class="filter-tab" data-filter="ホロライブ" onclick="setFilter(this)">ホロライブ</button>
+      <button class="filter-tab" data-filter="コナン" onclick="setFilter(this)">コナン</button>
+      <button class="filter-tab" data-filter="サプライ" onclick="setFilter(this)">サプライ</button>
+      <button class="filter-tab" data-filter="ゲーム機・ゲーム関連" onclick="setFilter(this)">ゲーム機・ゲーム関連</button>
+      <button class="filter-tab" data-filter="スマートフォン" onclick="setFilter(this)">スマートフォン</button>
+      <button class="filter-tab" data-filter="おもちゃ・ホビー・フィギュア" onclick="setFilter(this)">おもちゃ・ホビー・フィギュア</button>
+      <button class="filter-tab" data-filter="文房具（ステーショナリー）" onclick="setFilter(this)">文房具（ステーショナリー）</button>
     </div>
     <div id="records-list"></div>
   </div>
   </div><!-- /panel-history -->
+
+  <div class="password-modal" id="password-modal" onclick="if(event.target === this) closePasswordModal(false)">
+    <div class="password-dialog" role="dialog" aria-modal="true" aria-labelledby="password-title">
+      <h3 id="password-title">管理用パスワード</h3>
+      <p id="password-message"></p>
+      <input type="password" id="admin-password" autocomplete="current-password" onkeydown="if(event.key === 'Enter') submitAdminPassword()">
+      <div class="password-actions">
+        <button class="password-cancel" onclick="closePasswordModal(false)">キャンセル</button>
+        <button class="password-submit" onclick="submitAdminPassword()">確認</button>
+      </div>
+    </div>
+  </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -476,15 +633,18 @@
   const docRef = db.collection('data').doc('yahoo-price');
 
   const MAX_HISTORY = 300;
+  const ADMIN_PASSWORD_HASH = '9993ab34dc5a607a533cf9cfe10c902b249c3d55f5d7b609269dc199f136f5db';
   let records = [];
   let selectMode = false;
   let selectedIdxs = new Set();
-  let selectedCategory = 'その他';
+  let selectedCategory = 'ポケモン';
   let activeFilter = '全て';
   let editingIdx = null;
   let reorderMode = false;
   let dragState = null;
   let activeTab = 'history';
+  let adminMode = false;
+  let passwordResolve = null;
 
   // ── タブ切り替え ──
   function switchTab(tab) {
@@ -505,11 +665,22 @@
   }
 
   function setCategoryByValue(value) {
-    const cat = value || 'その他';
+    const cat = normalizeCategory(value);
     selectedCategory = cat;
     document.querySelectorAll('.cat-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.cat === cat);
     });
+  }
+
+  function normalizeCategory(value) {
+    const legacyCategories = {
+      'ポケモンカード': 'ポケモン',
+      'ワンピースカード': 'ワンピ',
+      '遊戯王カード': '遊戯王',
+      'ゲーム': 'ゲーム機・ゲーム関連',
+      'フィギュア': 'おもちゃ・ホビー・フィギュア'
+    };
+    return legacyCategories[value] || value || 'ポケモン';
   }
 
   // ── フィルタータブ ──
@@ -536,6 +707,62 @@
 
   function getRawPrice() {
     return document.getElementById('inp-price').value.replace(/[^\d]/g, '');
+  }
+
+  // ── ★管理 ──
+  async function hashPassword(value) {
+    const data = new TextEncoder().encode(value);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function requestAdminPassword(message) {
+    document.getElementById('password-message').textContent = message;
+    const input = document.getElementById('admin-password');
+    input.value = '';
+    document.getElementById('password-modal').style.display = 'flex';
+    setTimeout(() => input.focus(), 0);
+    return new Promise(resolve => { passwordResolve = resolve; });
+  }
+
+  function closePasswordModal(result) {
+    document.getElementById('password-modal').style.display = 'none';
+    const resolve = passwordResolve;
+    passwordResolve = null;
+    if (resolve) resolve(result);
+  }
+
+  async function submitAdminPassword() {
+    const password = document.getElementById('admin-password').value;
+    const valid = await hashPassword(password) === ADMIN_PASSWORD_HASH;
+    if (!valid) {
+      alert('パスワードが違います');
+      document.getElementById('admin-password').select();
+      return;
+    }
+    closePasswordModal(true);
+  }
+
+  async function unlockAdminMode() {
+    if (adminMode) {
+      adminMode = false;
+      document.getElementById('btn-admin').classList.remove('active');
+      document.getElementById('btn-admin').textContent = '★管理';
+      renderHistory();
+      return;
+    }
+    if (!await requestAdminPassword('管理用パスワードを入力してください')) return;
+    adminMode = true;
+    document.getElementById('btn-admin').classList.add('active');
+    document.getElementById('btn-admin').textContent = '管理終了';
+    renderHistory();
+  }
+
+  function toggleStar(fullIdx) {
+    if (!adminMode || !records[fullIdx]) return;
+    records[fullIdx] = { ...records[fullIdx], starred: !records[fullIdx].starred };
+    save();
+    renderHistory();
   }
 
   // ── 履歴 ──
@@ -589,8 +816,10 @@
     renderHistory();
   }
 
-  function deleteSelected() {
+  async function deleteSelected() {
     if (!selectedIdxs.size) return;
+    const includesStarred = [...selectedIdxs].some(i => records[i]?.starred);
+    if (includesStarred && !await requestAdminPassword('★付き履歴を削除するには管理用パスワードが必要です')) return;
     records = records.filter((_, i) => !selectedIdxs.has(i));
     save();
     selectedIdxs.clear();
@@ -607,10 +836,11 @@
     const list = document.getElementById('records-list');
     const filtered = records
       .map((h, i) => ({ ...h, _fullIdx: i }))
-      .filter(h => activeFilter === '全て' || (h.category || 'その他') === activeFilter);
+      .filter(h => activeFilter === '全て' || normalizeCategory(h.category) === activeFilter);
 
     list.classList.toggle('select-mode', selectMode);
     list.classList.toggle('reorder-mode', reorderMode);
+    list.classList.toggle('admin-mode', adminMode);
 
     // 複製・削除ボタンの状態を常に同期
     const dupBtn = document.getElementById('btn-duplicate-selected');
@@ -630,12 +860,13 @@
 
     if (reorderMode) {
       list.innerHTML = filtered.map((h, fi) => {
-        const cat = h.category || 'その他';
+        const cat = normalizeCategory(h.category);
         return `
           <div class="records-item" data-filter-idx="${fi}" onclick="onItemClick(${h._fullIdx})">
             <div class="records-item-body">
               <div class="records-top">
                 <div class="records-keyword">${h.keyword.replace(/</g, '&lt;')}</div>
+                ${h.starred ? '<span class="history-star" title="重要な履歴">★</span>' : ''}
                 <span class="cat-badge ${cat}">${cat}</span>
               </div>
               <div class="records-meta">
@@ -650,7 +881,7 @@
       }).join('');
     } else {
       list.innerHTML = filtered.map((h, fi) => {
-        const cat = h.category || 'その他';
+        const cat = normalizeCategory(h.category);
         const isSelected = selectedIdxs.has(h._fullIdx);
         return `
           <div class="records-item${isSelected ? ' selected' : ''}" data-idx="${h._fullIdx}" data-filter-idx="${fi}" onclick="onItemClick(${h._fullIdx})">
@@ -658,6 +889,7 @@
             <div class="records-item-body">
               <div class="records-top">
                 <div class="records-keyword">${h.keyword.replace(/</g, '&lt;')}</div>
+                ${h.starred ? '<span class="history-star" title="重要な履歴">★</span>' : ''}
                 <span class="cat-badge ${cat}">${cat}</span>
               </div>
               <div class="records-meta">
@@ -666,6 +898,7 @@
               </div>
             </div>
             <div class="records-item-right">
+              <button class="btn-star" onclick="event.stopPropagation(); toggleStar(${h._fullIdx})">${h.starred ? '★解除' : '★付与'}</button>
               <button class="btn-records-edit" onclick="event.stopPropagation(); editHistory(${h._fullIdx})">編集</button>
               <span class="records-arrow">›</span>
               <span class="drag-handle" data-filter-idx="${fi}">☰</span>
@@ -729,7 +962,7 @@
 
   function cancelEdit() {
     editingIdx = null;
-    setCategoryByValue('その他');
+    setCategoryByValue('ポケモン');
     document.getElementById('inp-keyword').value = '';
     document.getElementById('inp-price').value = '';
     document.getElementById('form-title').textContent = '新規検索';
@@ -866,7 +1099,7 @@
     // フィルター済みリストのスナップショット
     const filtered = records
       .map((h, i) => ({ ...h, _fullIdx: i }))
-      .filter(h => activeFilter === '全て' || (h.category || 'その他') === activeFilter);
+      .filter(h => activeFilter === '全て' || normalizeCategory(h.category) === activeFilter);
 
     // フィルター内で並び替え
     const newFiltered = [...filtered];
