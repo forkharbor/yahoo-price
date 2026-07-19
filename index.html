@@ -467,16 +467,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
       margin-bottom: 8px;
     }
     .title-row h1 { margin-bottom: 0; }
     .subtitle { color: #a08176; margin-bottom: 36px; }
-    .otter-mascot {
-      width: 56px;
-      height: 56px;
-      object-fit: contain;
-      filter: drop-shadow(0 6px 8px rgba(126, 88, 72, 0.16));
+    @media (max-width: 600px) {
+      .title-row h1 {
+        font-size: 1.05rem;
+        white-space: nowrap;
+        letter-spacing: 0;
+      }
     }
     .card, .records-item, .tab-bar {
       background: #ffffff;
@@ -534,7 +534,6 @@
 
   <div class="title-row">
     <h1>Yahoo!ショッピング 価格調査</h1>
-    <img class="otter-mascot" src="otter.png" alt="貝がらを持ったラッコ">
   </div>
   <p class="subtitle">価格＋送料が安い順で検索します</p>
 
